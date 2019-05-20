@@ -4,10 +4,6 @@ output:
   pdf_document: default
 ---
 
-Part 1:
-
-Step 1:
-
 ```{r read_csv, warning = FALSE}
 library(tidyverse)
 data <- read_csv("data.csv")
@@ -15,10 +11,10 @@ data <- read_csv("data.csv")
 fifa <- data %>%
   select(ID, Name, Age, Club, Value, Wage, `Body Type`, Position, Joined, Height, Weight, BallControl, Dribbling, Strength, SprintSpeed, Acceleration, Interceptions, Stamina, Vision, Marking, Balance)
 
-View(fifa)
 ```
 
+Selena's Part:
 
+Matthew's Part:
 
-
- 
+Scott's Part:
