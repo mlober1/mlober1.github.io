@@ -8,19 +8,17 @@ Part 1:
 
 Step 1:
 
-```{r warning = FALSE }
-library(rvest)
-library(tibble)
-# loading code goes here
-url <- "https://www.spaceweatherlive.com/en/solar-activity/top-50-solar-flares"
+```{r read_csv}
+library(tidyverse)
+data <- read_csv("data.csv")
 
-flares_table <- url %>%
-  read_html() %>%
-  html_node("[class='table table-striped table-responsive-md']") %>%
-  html_table() %>%
-  magrittr::set_colnames(c("rank", "flare_classification", "date", "flare_region", "start_time", "maximum_time", "end_time", "movie")) %>%
-  as_tibble()
+fifa <- data %>%
+  select(ID, Name, Age, Club, Value, Wage, `Body Type`, Position, Joined, Height, Weight, BallControl, Dribbling, Strength, SprintSpeed, Acceleration, Interceptions, Stamina, Vision, Marking, Balance)
 
-flares_table
+View(fifa)
 ```
+
+
+
+
  
