@@ -8,7 +8,7 @@ Part 1:
 
 Step 1:
 
-```{r read_csv}
+```{r read_csv, warning = FALSE}
 library(tidyverse)
 data <- read_csv("data.csv")
 
