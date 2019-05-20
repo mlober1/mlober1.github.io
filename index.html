@@ -189,34 +189,46 @@ $(document).ready(function () {
 
 <p>Part 1:</p>
 <p>Step 1:</p>
-<pre class="r"><code>library(rvest)</code></pre>
-<pre><code>## Loading required package: xml2</code></pre>
-<pre class="r"><code>library(tibble)
-# loading code goes here
-url &lt;- &quot;https://www.spaceweatherlive.com/en/solar-activity/top-50-solar-flares&quot;
+<pre class="r"><code>library(tidyverse)</code></pre>
+<pre><code>## -- Attaching packages ----------------------------------------------------------------------------------------------------------------------------------- tidyverse 1.2.1 --</code></pre>
+<pre><code>## v ggplot2 3.1.0       v purrr   0.3.1  
+## v tibble  2.0.1       v dplyr   0.8.0.1
+## v tidyr   0.8.3       v stringr 1.4.0  
+## v readr   1.3.1       v forcats 0.4.0</code></pre>
+<pre><code>## -- Conflicts -------------------------------------------------------------------------------------------------------------------------------------- tidyverse_conflicts() --
+## x dplyr::filter() masks stats::filter()
+## x dplyr::lag()    masks stats::lag()</code></pre>
+<pre class="r"><code>data &lt;- read_csv(&quot;data.csv&quot;)</code></pre>
+<pre><code>## Parsed with column specification:
+## cols(
+##   .default = col_character(),
+##   X1 = col_double(),
+##   ID = col_double(),
+##   Age = col_double(),
+##   Overall = col_double(),
+##   Potential = col_double(),
+##   Special = col_double(),
+##   `International Reputation` = col_double(),
+##   `Weak Foot` = col_double(),
+##   `Skill Moves` = col_double(),
+##   `Jersey Number` = col_double(),
+##   Crossing = col_double(),
+##   Finishing = col_double(),
+##   HeadingAccuracy = col_double(),
+##   ShortPassing = col_double(),
+##   Volleys = col_double(),
+##   Dribbling = col_double(),
+##   Curve = col_double(),
+##   FKAccuracy = col_double(),
+##   LongPassing = col_double(),
+##   BallControl = col_double()
+##   # ... with 24 more columns
+## )</code></pre>
+<pre><code>## See spec(...) for full column specifications.</code></pre>
+<pre class="r"><code>fifa &lt;- data %&gt;%
+  select(ID, Name, Age, Club, Value, Wage, `Body Type`, Position, Joined, Height, Weight, BallControl, Dribbling, Strength, SprintSpeed, Acceleration, Interceptions, Stamina, Vision, Marking, Balance)
 
-flares_table &lt;- url %&gt;%
-  read_html() %&gt;%
-  html_node(&quot;[class='table table-striped table-responsive-md']&quot;) %&gt;%
-  html_table() %&gt;%
-  magrittr::set_colnames(c(&quot;rank&quot;, &quot;flare_classification&quot;, &quot;date&quot;, &quot;flare_region&quot;, &quot;start_time&quot;, &quot;maximum_time&quot;, &quot;end_time&quot;, &quot;movie&quot;)) %&gt;%
-  as_tibble()
-
-flares_table</code></pre>
-<pre><code>## # A tibble: 50 x 8
-##     rank flare_classific~ date  flare_region start_time maximum_time
-##    &lt;int&gt; &lt;chr&gt;            &lt;chr&gt;        &lt;int&gt; &lt;chr&gt;      &lt;chr&gt;       
-##  1     1 X28.0            2003~          486 19:29      19:53       
-##  2     2 X20.0            2001~         9393 21:32      21:51       
-##  3     3 X17.2            2003~          486 09:51      11:10       
-##  4     4 X17.0            2005~          808 17:17      17:40       
-##  5     5 X14.4            2001~         9415 13:19      13:50       
-##  6     6 X10.0            2003~          486 20:37      20:49       
-##  7     7 X9.4             1997~         8100 11:49      11:55       
-##  8     8 X9.3             2017~         2673 11:53      12:02       
-##  9     9 X9.0             2006~          930 10:18      10:35       
-## 10    10 X8.3             2003~          486 17:03      17:25       
-## # ... with 40 more rows, and 2 more variables: end_time &lt;chr&gt;, movie &lt;chr&gt;</code></pre>
+View(fifa)</code></pre>
 
 
 
