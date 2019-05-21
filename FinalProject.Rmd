@@ -4,19 +4,17 @@ output:
   pdf_document: default
 ---
 
-<<<<<<< HEAD
 Part 1:
 
-We are using a dataset in which each entity represents a FIFA 2019 player, and the attributes examine the players' statistics and biological features. This dataset comes with 90 attributes. In order to choose which attributes we will be analyzing, use the tidy::select() function to decide which attributes are displayed per row.
+We are using a dataset in which each entity represents a FIFA 2019 player, and the attributes examine the players' statistics and biological features. Throughout this tutorial we will be manipulating this data set in different ways to show different statistics about players in the FIFA 2019 game. 
+
+This dataset comes with 90 attributes. In order to choose which attributes we will be analyzing, use the tidy::select() function to decide which attributes are displayed per row.
 
 A key function that you will see used here and in many other parts of this tutorial is the piping function, %>%. This function takes a dataframe on the left handside, and uses that dataframe as the first argument for the function called on the right hand side. It is very useful for compounding functions one after another on an altered dataframe.
 
 Lastly, using the head() function, you can view the first few rows of your dataframe.
 
-```{r gather_data, warning = FALSE}
-=======
 ```{r read_csv, warning = FALSE}
->>>>>>> 305ec4bfe0bc96328329d5791f6bfc614cc8cf63
 library(tidyverse)
 data <- read_csv("data.csv")
 
@@ -103,7 +101,6 @@ fifa_data <- fifa_bio %>%
 
 ```
 
-<<<<<<< HEAD
 Now that the associated club is within the same dataset as all of the stats, we can take a summary of the data by averaging the 10 statistics (BallControl, Dribbling, Strength, SprintSpeed, Acceleration, Interceptions, Stamina, Vision, Marking, Balance) for each team by aggregating the data using group_by() and summarize().
 ```{r playerAvgs}
 
@@ -131,15 +128,139 @@ fifa_data %>%
   
 ```
 
-This plot shows that as age increases, average stamina of a futbol player decreases.
+This plot shows that as age increases, average stamina of a futbol player decreases. This is one of the many helpful charts that are able to be made through the power of R. Data representation such as this is why R is important to data science, and knowing how to manipulate data in these ways is helpful for showing data to people to convince them of a trend. 
 
+There are many other graphs you can make in R using ggplot, and it is essential to know how to make these graphs as visual data is the easiest way to convey a point or trend. Lets keep manipulating the football player stamina vs age statistics to see which graph conveys the trend that as age increases average stamina decreases. But first lets check if there are any missing entities in our table, as this may shift the data being displayed.
 
+```{r  warning = FALSE}
 
+summarized_data <- fifa_data %>%
+  group_by(Age) %>%
+  summarise(avg_stamina=mean(Stamina))
+summarized_data
+  
+```
 
-=======
-Selena's Part:
->>>>>>> 305ec4bfe0bc96328329d5791f6bfc614cc8cf63
+As you can see there is a lot of missing data in this table, and this can be for a variety of reasons. The way to handle missing data is dependant on why the data is missing. For instance if one weather station in a data set measures the temperature every day, while another weather station only measures the temperature every week, there will be a lot of missing data for temperatures of the days they didn't measure. The main two ways to handle missing data are to either remove the observations that are missing, or to impute the missing values by for example making every missing piece of data the average of all of the data that is present. Some missing data is missing at random, and some is missing systematically. In this case we should remove the missing data.
 
-Matthew's Part:
+```{r  warning = FALSE}
 
-Scott's Part:
+summarized_data  %>%
+  drop_na(avg_stamina)
+summarized_data
+  
+```
+
+Here we use the drop_na function to remove any instance of NA in our avg_stamina field, this way we are given a much cleaner data set that is easier to analyze. 
+
+```{r  warning = FALSE}
+
+summarized_data  %>%
+  ggplot(mapping=aes(x=Age, y=avg_stamina)) +
+  geom_bar(stat = "identity") +
+  labs(title="Football player stamina vs Age",
+       x = "Age",
+       y = "Average Stamina")
+  
+```
+
+Here we display the average stamina across age in a bar graph. This is a much more effective display of data as it is easier to see how average stamina changes as age grows older. Knowing which type of graph to use is essential for displaying data effectively. I highly suggest reading more on the subject through these sources. https://www.skillsyouneed.com/num/graphs-charts.html and https://blog.hubspot.com/marketing/types-of-graphs-for-data-visualization
+
+Now we're going to be moving onto obtaining specific teams through regular expressions and string manipulation.
+
+```{r  warning = FALSE}
+
+clubs <- fifa_data %>% 
+  group_by(Club) %>%
+  summarize(Players = n_distinct(Name))
+
+clubs
+  
+```
+
+Here we have a table that shows us each club and the amount of players on each club. First we're going to omit the NA club as that data is not useful to us, and this will make the data more tidy.
+
+```{r  warning = FALSE}
+library(stringr)
+clubs %>%
+  drop_na(Club)
+  
+```
+
+Regular expressions and string manipulations are important because lets say we wanted to only obtain information about teams with FC in front of their name, or CD in front of their name. How would we approach that? Filtering the table by typing out every club's name that starts out with FC or CD would be redundant and time consuming, this is where regular expressions come in.
+
+```{r  warning = FALSE}
+
+clubs %>%
+  filter(str_detect(Club, "CD .*"))
+  
+```
+
+Here we combine the str_detect function from the stringr library with the filter function in order to obtain teams only with the name that starts with CD. This is a much simpler way to filter out the rest of the teams without having to go through the struggle of typing out every team that starts with CD. The expression "CD .*" takes any name with CD in it and follows with a space followed by any amount of any character. The period matches any character, and the \* says there can be zero or more of any character. As you can see there is an issue here though, as teams with the name RCD are also included. To fix this is quite simple, the ^ character implicates that it must start with a certain string, and the $ character indicates it must end with a certain string.
+
+```{r  warning = FALSE}
+
+clubs %>%
+  filter(str_detect(Club, "^CD .*"))
+  
+```
+
+Here's our fixed data set using the ^ character to say that the club name must start with CD. There are many more intricacies and impressive things you can do with regular expressions in R and other languages, I highly suggest you read more on the subject here: http://www.hcbravo.org/IntroDataSci/bookdown-notes/text-and-dates.html
+
+You can also test out your regular expressions on this website:
+https://rubular.com/
+
+The next topic we will be focusing on is Exploratory Data Analysis, which is a field about better understanding data we have gathered. This lets us make decisions about how to display data in order to properly visualize it to come to conclusions about said data. A big part of EDA is understanding central trends (mean), spread (variance), skew, and outliers. This helps us understand relationships between variables and ways to model them. Lets start off simply by visualizing single variables, such as the amount of players on a club team. A great way to visualize this is by using a boxplot.
+
+```{r  warning = FALSE}
+
+clubs %>%
+  ggplot(aes(x = '', y = Players)) + 
+  geom_boxplot()
+  
+```
+
+As you can see by this boxplot, simply graphing the number of players per team doesn't work when the data isn't tidy. This plot shows that there is a huge outlier from the NA team that skews all of the data to the right. This makes the data hard to visualize and therefore not productive to creating an effective visual represntation of this data. To fix this we must once again tidy the data.
+
+```{r  warning = FALSE}
+
+clubs %>%
+  drop_na(Club) %>%
+  ggplot(aes(x = '', y = Players)) + 
+  geom_boxplot()
+  
+```
+
+Here we have a much more effective display of data. A boxplot is effective at showing the mean, quartiles, outliers, and range in a data set. Here the range is around 18-33 as seen by the top of the boxplot and the bottom. The outliers are at the bottom represented by dots, and the quartiles are represented by the top and bottom part of the box. The mean is about 27 shown by the line through the box. This data generally tells us that most teams have at least 26 players on their team. Next we will be graphing distributions of height and weight to see if there are any correlations between the two.
+
+```{r  warning = FALSE}
+
+htwt <- fifa_bio %>%
+  select(Name, Height, Weight)
+
+htwt %>% head()
+
+```
+
+Here we have isolated the name of each player with just their height and weight so we can have a clean easy to read data set to manipulate and graph. A boxplot would not be an effective way to display this data and it's trends because the boxplot is limited to taking one variable or a group of one variable. Instead we will use a point graph to document each point of data.
+
+```{r  warning = FALSE}
+
+htwt %>%
+  ggplot(aes(x=Height, y=Weight)) +
+  geom_point()
+  
+```
+
+In this graph you can see there is a general trend of as you become taller you tend to way more. The reason why the point graph looks like many lines of dots is because height is not continuous, you can either be 70 inches or 71 inches tall in this data set, there is no inbetween. A great way to represent this upward trend is by adding a line of best fit, otherwise known as a regression line to show the trend in this data directly. A regression line is calculated through the residual sum of squares which we will talk about later.
+
+```{r  warning = FALSE}
+
+htwt %>%
+  ggplot(aes(x=Height, y=Weight)) +
+  geom_point() + 
+  geom_smooth(method=lm)
+  
+```
+
+This graph is a much better representation of the data as it shows the tendency clearly on the blue line, which is an effective way of making a point about how height is directly related to weight and the taller you are the more you are going to weigh. 
