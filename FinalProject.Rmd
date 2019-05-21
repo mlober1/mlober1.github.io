@@ -4,6 +4,7 @@ output:
   pdf_document: default
 ---
 
+<<<<<<< HEAD
 Part 1:
 
 We are using a dataset in which each entity represents a FIFA 2019 player, and the attributes examine the players' statistics and biological features. This dataset comes with 90 attributes. In order to choose which attributes we will be analyzing, use the tidy::select() function to decide which attributes are displayed per row.
@@ -13,6 +14,9 @@ A key function that you will see used here and in many other parts of this tutor
 Lastly, using the head() function, you can view the first few rows of your dataframe.
 
 ```{r gather_data, warning = FALSE}
+=======
+```{r read_csv, warning = FALSE}
+>>>>>>> 305ec4bfe0bc96328329d5791f6bfc614cc8cf63
 library(tidyverse)
 data <- read_csv("data.csv")
 
@@ -99,6 +103,7 @@ fifa_data <- fifa_bio %>%
 
 ```
 
+<<<<<<< HEAD
 Now that the associated club is within the same dataset as all of the stats, we can take a summary of the data by averaging the 10 statistics (BallControl, Dribbling, Strength, SprintSpeed, Acceleration, Interceptions, Stamina, Vision, Marking, Balance) for each team by aggregating the data using group_by() and summarize().
 ```{r playerAvgs}
 
@@ -131,7 +136,10 @@ This plot shows that as age increases, average stamina of a futbol player decrea
 
 
 
+=======
+Selena's Part:
+>>>>>>> 305ec4bfe0bc96328329d5791f6bfc614cc8cf63
 
+Matthew's Part:
 
-
- 
+Scott's Part:
