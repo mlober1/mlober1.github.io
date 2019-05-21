@@ -6,17 +6,130 @@ output:
 
 Part 1:
 
-Step 1:
+We are using a dataset in which each entity represents a FIFA 2019 player, and the attributes examine the players' statistics and biological features. This dataset comes with 90 attributes. In order to choose which attributes we will be analyzing, use the tidy::select() function to decide which attributes are displayed per row.
 
-```{r read_csv, warning = FALSE}
+A key function that you will see used here and in many other parts of this tutorial is the piping function, %>%. This function takes a dataframe on the left handside, and uses that dataframe as the first argument for the function called on the right hand side. It is very useful for compounding functions one after another on an altered dataframe.
+
+Lastly, using the head() function, you can view the first few rows of your dataframe.
+
+```{r gather_data, warning = FALSE}
 library(tidyverse)
 data <- read_csv("data.csv")
 
-fifa <- data %>%
-  select(ID, Name, Age, Club, Value, Wage, `Body Type`, Position, Joined, Height, Weight, BallControl, Dribbling, Strength, SprintSpeed, Acceleration, Interceptions, Stamina, Vision, Marking, Balance)
+# a table containing each player and their biological information
+fifa_bio <- data %>%
+  select(ID, Name, Age, Club, Value, Wage, `Body Type`, Position, Height, Weight)
 
-View(fifa)
+# a table containing each player and their playing statistics
+fifa_stats <- data %>%
+  select(ID, Name, BallControl, Dribbling, Strength, SprintSpeed, Acceleration, Interceptions, Stamina, 
+         Vision, Marking, Balance)
+
+# displays the first 6 rows of the fifa_stats table
+fifa_stats %>% head()
+
 ```
+
+With close to 20,000 entries, we may only want to view a few rows at once. The first way to do so is by using the slice() function. In this function, you provide a dataframe and which rows you would like to see, either by using a range "1:n", explicitly stating which rows you would like to see "c(1, 2, 5, 7)", or some other way of determining a row using seq() as an argument.
+```{r slice_ex}
+
+fifa_bio %>%
+  slice(1:7)
+
+```
+
+You may want to select certain rows more specifically, perhaps by which team they play for, or by their age. To do so, use the filter() function which takes a conditional statement as its argument and displays only the rows that evaluate to true.
+```{r filter_ex}
+
+# this will only return the FIFA players that play for Real Madrid younger than 30
+fifa_bio %>%
+  select(Name, Age, Club) %>%
+  filter(Club == "Real Madrid" & Age < 30) %>%
+# by using the arrange() function, you can display the filtered players in age-order.
+  arrange(Age)
+
+```
+
+In the fifa_bio table, monetary values are displayed in pounds. To make this dataset more accessible to Americans, we can "tidy" the data to convert it to USD. In order to add a new column to a dataframe, use the mutate() function.
+```{r money_conv}
+
+# based on the conversion rate at the time doing this project, 1 pound = 1.27 USD.
+fifa_bio <- fifa_bio %>%
+  # extracts the numeric magnitude from the string stored for both Value and Wage and then converts it to USD by using the mutate() function.
+  separate(Value, c("currency", "monetary_value"), sep=1) %>%
+  separate(monetary_value, c("magnitude", "millions"), sep=("M")) %>%
+  transform(magnitude = as.numeric(magnitude)) %>%
+  mutate(Value_USD = magnitude*1.27*1000000) %>%
+  separate(Wage, c("currency2", "monetary_value2"), sep=1) %>%
+  separate(monetary_value2, c("magnitude2", "millions2"), sep=("K")) %>%
+  transform(magnitude2 = as.numeric(magnitude2)) %>%
+  mutate(Salary_USD = magnitude2*1.27*1000) %>%
+  select(ID, Name, Age, Club, Value_USD, Salary_USD, Position, Height, Weight)
+
+```
+
+To use weight as a numeric value, we must extract the lbs units to convert it to numeric.
+```{r weight_conv}
+
+fifa_bio <- fifa_bio %>%
+  separate(Weight, c("Weight", "units"), sep=3) %>%
+  transform(Weight = as.numeric(Weight)) %>%
+  select(ID, Name, Age, Club, Value_USD, Salary_USD, Position, Height, Weight)
+
+```
+
+To use height as a numeric entity, we must convert it to inches and then convert it to numeric.
+```{r height_conv}
+
+fifa_bio <- fifa_bio %>%
+  separate(Height, c("Feet", "Inches"), sep="'") %>%
+  transform(Feet = as.numeric(Feet)) %>%
+  transform(Inches = as.numeric(Inches)) %>%
+  mutate(Height = ((Feet*12) + Inches)) %>%
+  select(ID, Name, Age, Club, Value_USD, Salary_USD, Position, Height, Weight)
+  
+```
+
+Since we are working with 2 separate datasets which both contain important information, we can combine the two datasets using a join function. In the pipeline below, fifa_bio and fifa_stats are joined based on matching player names. This will allow us to analyze biological attributes, like height and weight, against playing stats, like speed and acceleration, later on. Since some players have their stats recorded over a range of years, these tables must be joined on a composite key combo of their name and the ID of the entry, which varies based on their age.
+
+```{r join} 
+
+fifa_data <- fifa_bio %>%
+  left_join(fifa_stats, by=c("Name" = "Name", "ID" = "ID"))
+
+```
+
+Now that the associated club is within the same dataset as all of the stats, we can take a summary of the data by averaging the 10 statistics (BallControl, Dribbling, Strength, SprintSpeed, Acceleration, Interceptions, Stamina, Vision, Marking, Balance) for each team by aggregating the data using group_by() and summarize().
+```{r playerAvgs}
+
+fifa_data %>%
+  group_by(Club) %>%
+  summarise(BallControl=mean(BallControl), Dribbling=mean(Dribbling), 
+            Strength=mean(Strength), SprintSpeed=mean(SprintSpeed), 
+            Acceleration=mean(Acceleration), Interceptions=mean(Interceptions), 
+            Stamina=mean(Stamina), Vision=mean(Vision), Marking=mean(Marking), 
+            Balance=mean(Balance))
+  
+```
+
+Now that all of the attributes we wish to look at are in one table, we can do a basic visualization using the ggplot() function. Let's look at Stamina by Age. This plot will show a very basic dot plot by grouping the players together by age and averaging their stamina.
+```{r basic_plot}
+
+fifa_data %>%
+  group_by(Age) %>%
+  summarise(avg_stamina=mean(Stamina)) %>%
+  ggplot(mapping=aes(x=Age, y=avg_stamina)) +
+  geom_point() +
+  labs(title="Football player stamina vs Age",
+       x = "Age",
+       y = "Average Stamina")
+  
+```
+
+This plot shows that as age increases, average stamina of a futbol player decreases.
+
+
+
 
 
 
