@@ -252,7 +252,7 @@ htwt %>%
   
 ```
 
-In this graph you can see there is a general trend of as you become taller you tend to way more. The reason why the point graph looks like many lines of dots is because height is not continuous, you can either be 70 inches or 71 inches tall in this data set, there is no inbetween. A great way to represent this upward trend is by adding a line of best fit, otherwise known as a regression line to show the trend in this data directly. A regression line is calculated through the residual sum of squares which we will talk about later.
+In this graph you can see there is a general trend of as you become taller you tend to weigh more. The reason why the point graph looks like many lines of dots is because height is not continuous, you can either be 70 inches or 71 inches tall in this data set, there is no inbetween. A great way to represent this upward trend is by adding a line of best fit, otherwise known as a regression line to show the trend in this data directly. A regression line is calculated through the residual sum of squares which we will talk about later.
 
 ```{r  warning = FALSE}
 
@@ -264,3 +264,136 @@ htwt %>%
 ```
 
 This graph is a much better representation of the data as it shows the tendency clearly on the blue line, which is an effective way of making a point about how height is directly related to weight and the taller you are the more you are going to weigh. 
+
+Now something that a FIFA 19 gamer might be interested in is understanding how the different player attributes affect one another. For example, maybe we could test the relationships between Vision/Marking or BallControl/Stamina. Or maybe, according to you, it would seem likely that players who have a high Acceleration rating would also have a high Interceptions rating as they are better at rushing up to a player and stealing the ball from them. Luckily, there are functions in R from the broom library that allow us to put this hypothesis to the test.
+
+```{r scott1,warning = FALSE}
+library(broom)
+
+gap_fit <- lm(Marking~Vision, data=fifa_stats)
+tidy_gap_fit <- tidy(gap_fit)
+tidy_gap_fit
+
+gap_fit <- lm(BallControl~Stamina, data=fifa_stats)
+tidy_gap_fit <- tidy(gap_fit)
+tidy_gap_fit
+
+gap_fit <- lm(Interceptions~SprintSpeed, data=fifa_stats)
+tidy_gap_fit <- tidy(gap_fit)
+
+tidy_gap_fit
+```
+
+We can use the lm function to determine whether or not there is a significant relationship between Interceptions and Sprint Speed.
+What we find for the players in FIFA 19 is that there is a significant relationship between the two attributes. If we look the the
+p-value in the table generated, we find an extremely small number. In this case, this p-value represents the probability in which we
+mistakenly reject the hypothesis that Sprint Speed and Interceptions are not correlated. This is important to note as a small number
+indicates that our hypothesis is correct.
+
+In R, we also have functions that provide users with additional information about linear regression models.
+
+```{r scott10, warning=FALSE}
+gap_fit %>%
+  glance() %>%
+  select(r.squared, df)
+```
+
+In the code above, we use the glance() function to print out the r-squared value and the degrees of freedom of our linear regression model. The r-squared value is the proportion of the variance in the dependent variable that is predictable from the independent variable. The degrees of freedom represents the number of independent factors affecting the range of states in which a system may exist.
+
+To read up more on r-squared values and their purpose, the following article is very informative
+https://blog.minitab.com/blog/adventures-in-statistics-2/regression-analysis-how-do-i-interpret-r-squared-and-assess-the-goodness-of-fit
+
+The next important step in developing our regression model is to test whether or not a linear model suits our data. In order to
+properly test our current model, we can plot residuals as a function of the fitted values from our model. Once again we will be using
+a function from the broom library, augment().
+
+```{r scott13, warning = FALSE}
+augmented_fit <- gap_fit %>%
+  augment()
+augmented_fit %>% head()
+```
+
+The table above shows all of the information we need to assess the linearity or non-linearity of our model. However, it may be easier to understand this data when displayed visually, plotting residuals against fitted values.
+
+```{r scott16, warning = FALSE}
+augmented_fit %>%
+  ggplot(aes(x=.fitted,y=.resid)) +
+    geom_point() + 
+    labs(x="fitted", y="residual")
+```
+
+Even though we plotted our residuals against the fitted values, the data is still somewhat unorganized. When analyzing your regression model, it can be very helpful to add a line showing the trend of the data. We will do this by adding geom_smooth() to our plotting code.
+
+```{r scott20, warning = FALSE}
+augmented_fit %>%
+  ggplot(aes(x=.fitted,y=.resid)) +
+    geom_point() + 
+    geom_smooth() +
+    labs(x="fitted", y="residual")
+```
+
+When assessing the quality of our model using a residual plot, we want to see constant variance throughout the plot. However, as indicated by the regression line, our variance is far from constant, indicating that there is an issue with our regression model.
+
+In addition to testing how two player attributes interact with each other, R allows us to use the lm() function to create multivariate regression models. Multiple linear regressions can be much more useful than linear regressions with two variables as it gives data scientists a better idea of the data systems. The following lists a couple examples of linear regression models. You will notice that as you add more variables the coefficients continue to change even when the some of the attributes used stay the same.
+
+```{r scott25, warning = FALSE}
+multi_gap_fit <- lm(Interceptions~1+Marking+BallControl, data=fifa_stats)
+multi_gap_fit
+
+multi_gap_fit <- lm(Interceptions~1+Vision+Marking+BallControl, data=fifa_stats)
+multi_gap_fit
+
+multi_gap_fit <- lm(Interceptions~1+Acceleration+Vision+Marking+BallControl, data=fifa_stats)
+multi_gap_fit
+
+multi_gap_fit <- lm(Interceptions~1+SprintSpeed+Acceleration+Vision+Marking+BallControl, data=fifa_stats)
+multi_gap_fit
+```
+
+So far in our analysis of our data using regression models, we have only used continuous variables. However, how would we handle regression models that include categorical values such as the Position attribute in our fifa_bio dataframe? Variables will not always be continuous and it is important to understand how to correctly incorporate categorical attributes into your regression model.
+
+Luckily, R functions make adding categorical attributes to our model pretty straightforward. What we first have to do is add attributes for each possible value of our categorical attribute but one.
+
+```{r scott34, warning = FALSE}
+fifa_bio <- fifa_bio %>%
+  mutate(Position=factor(Position))
+levels(fifa_bio$Position)
+```
+
+In the above example, we used factor() to break the Position attribute into all of its possible values. Then we simply used levels() to print out all of the values in our dataset for Position.
+
+We can also use model.matrix() to look at what our new dataframe looks like.
+
+```{r scott37, warning = FALSE}
+fifa_df <- model.matrix(~Position, data=fifa_bio) %>% 
+  as.data.frame() 
+
+fifa_df %>%
+  head()
+```
+
+We can use model.matrix again with a similar process to create a matrix including our new attributes comparing them to another attribute such as Value_USD. Let's look at an example of how we would implement this.
+
+```{r scott40, warning = FALSE}
+fifa_df <- model.matrix(~Value_USD+Age+Position+Value_USD:Position, data=fifa_bio) %>% 
+  as.data.frame() 
+
+fifa_df %>%
+  head()
+```
+
+Now that we have seen different ways of handling categorical attributes in regression models, let us look at an approach to graphing data in order to focus on the effect a categorical attribute has on other attributes. In the following example, we will first look at the graphical relationship between Age and Value_USD. Then we will look at how we can add our categorical attribute to create a better graph.
+
+```{r scott43, warning = FALSE}
+fifa_bio %>%
+  ggplot(aes(x=Age, y=Value_USD)) +
+    geom_point() +
+    geom_smooth(method=lm)
+
+fifa_bio %>%
+  ggplot(aes(x=Age, y=Value_USD,color=Position)) +
+    geom_point() +
+    geom_smooth(method=lm)
+```
+
+
