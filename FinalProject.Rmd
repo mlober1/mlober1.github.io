@@ -4,7 +4,7 @@ output:
   pdf_document: default
 ---
 
-Part 1:
+Tutorial by Matthew Lober, Scott Macchia, and Selena Alvarado.
 
 We are using a dataset in which each entity represents a FIFA 2019 player, and the attributes examine the players' statistics and biological features. Throughout this tutorial we will be manipulating this data set in different ways to show different statistics about players in the FIFA 2019 game. 
 
@@ -210,7 +210,20 @@ Here's our fixed data set using the ^ character to say that the club name must s
 You can also test out your regular expressions on this website:
 https://rubular.com/
 
-The next topic we will be focusing on is Exploratory Data Analysis, which is a field about better understanding data we have gathered. This lets us make decisions about how to display data in order to properly visualize it to come to conclusions about said data. A big part of EDA is understanding central trends (mean), spread (variance), skew, and outliers. This helps us understand relationships between variables and ways to model them. Lets start off simply by visualizing single variables, such as the amount of players on a club team. A great way to visualize this is by using a boxplot.
+The next topic we will be focusing on is Exploratory Data Analysis, which is a field about better understanding data we have gathered. This lets us make decisions about how to display data in order to properly visualize it to come to conclusions about said data. A big part of EDA is understanding central trends (mean), spread (variance), skew, and outliers. This helps us understand relationships between variables and ways to model them. Lets start off simply by visualizing single variables, such as the amount of players on a club team. We will mainly be looking at how some graphs don't fit certain data sets and other graphs fit much better. First we will try a histogram.
+
+```{r  warning = FALSE}
+
+clubs %>%
+  ggplot(mapping = aes(x = Players)) + 
+  geom_histogram() +
+  labs(title="Count of players",
+       x = "Player amount",
+       y = "Amount of teams with that many players")
+  
+```
+
+Here we can clearly see that a histogram doesn't represent the data well at all, we have no idea what it is trying to say and it doesn't convey any trend. Let's try a histogram instead.
 
 ```{r  warning = FALSE}
 
@@ -220,7 +233,7 @@ clubs %>%
   
 ```
 
-As you can see by this boxplot, simply graphing the number of players per team doesn't work when the data isn't tidy. This plot shows that there is a huge outlier from the NA team that skews all of the data to the right. This makes the data hard to visualize and therefore not productive to creating an effective visual represntation of this data. To fix this we must once again tidy the data.
+The boxplot is a little better but we still have some work to do to make it effective. As you can see by this boxplot, simply graphing the number of players per team doesn't work when the data isn't tidy. This plot shows that there is a huge outlier from the NA team that skews all of the data to the right. This makes the data hard to visualize and therefore not productive to creating an effective visual represntation of this data. To fix this we must once again tidy the data.
 
 ```{r  warning = FALSE}
 
@@ -396,4 +409,5 @@ fifa_bio %>%
     geom_smooth(method=lm)
 ```
 
-
+Here the categorical attributes show each different position's different age vs value rates with linear regression lines to show clear trends in the data. 
+All of this data and data manipulation above is important to understand because in order to convey a point effectively, proper data visualization and clean and tidy data is incredibly important. FIFA 2019 data is also important as it relates heavily to real soccer statistics as the makers of the game have created each player's statistics by using their own algorithms to determine each players skills. Data science is crucial to understanding the world we live in and it's trends.
